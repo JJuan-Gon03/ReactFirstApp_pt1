@@ -4,12 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev":"npm -w react-frontend run dev",
+    "dev": "npm -w react-frontend run dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
-  "workspaces":[
-      "packages/*"
-  ]
+  "workspaces": [
+    "packages/*"
+  ],
+  "dependencies": {
+    "cors": "^2.8.5"
+  }
 }
