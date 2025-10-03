@@ -52,6 +52,23 @@ app.get("/users/:id", (req, res) => {
   }
 });
 
+const findUsersByNameAndJob = (name, job) =>
+  users["users_list"].filter(
+    (user) => user["name"] === name && user["job"] === job
+  );
+
+app.get("/users/", (req, res) => {
+  const { name, job } = req.query;
+  let result = findUsersByNameAndJob(name, job);
+  if (result.length === 0) {
+    res.status(404).send("Resource not found.");
+  } else {
+    res.send(result);
+  }
+});
+
+
+
 const findUserByName = (name) => {
   return users["users_list"].filter(
     (user) => user["name"] === name
@@ -78,6 +95,26 @@ app.post("/users", (req, res) => {
   const userToAdd = req.body;
   addUser(userToAdd);
   res.send();
+});
+
+const delUser = (id) => {
+  const ids = users["users_list"].map(user => user.id);
+  const index = ids.indexOf(id);
+
+  if (index !== -1) {
+    users["users_list"].splice(index, 1);
+    return true;
+  }
+  return false;
+};
+
+app.delete("/users/:id", (req, res) => {
+  const id = req.params.id;
+  const deleted = delUser(id);
+
+  res
+    .status(deleted ? 200 : 404)
+    .send(deleted ? { message: `User ${id} deleted.` } : { error: "User not found." });
 });
 
 app.listen(port, () => {
