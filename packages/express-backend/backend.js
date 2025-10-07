@@ -47,11 +47,33 @@ const findUserByName = (name) => {
   );
 };
 
+const findUserByJob = (job) =>{
+return users["users_list"].filter(
+  (user) => user.job === job
+  );
+};
+
+const findUsersByNameAndJob = (name, job) =>{
+  return users["users_list"].filter(
+    (user) => user.name === name && user.job === job
+  );
+};
+
 app.get("/users", (req, res) => {
-  const name = req.query.name;
-  if (name != undefined) {
-    let result = findUserByName(name);
-    result = { users_list: result };
+  const { name, job } = req.query;
+  let result = users["users_list"];
+
+  if (name && job) {
+    result = findUsersByNameAndJob(name, job);
+    result = { users_list: result }; 
+    res.send(result);
+  } else if (name) {
+    result = findUserByName(name); 
+    result = { users_list: result }; 
+    res.send(result);
+  } else if (job) {
+    result = findUserByJob(job);
+    result = { users_list: result }; 
     res.send(result);
   } else {
     res.send(users);
@@ -71,21 +93,6 @@ app.get("/users/:id", (req, res) => {
   }
 });
 
-const findUsersByNameAndJob = (name, job) =>
-  users["users_list"].filter(
-    (user) => user["name"] === name && user["job"] === job
-  );
-
-app.get("/users/", (req, res) => {
-  const { name, job } = req.query;
-  let result = findUsersByNameAndJob(name, job);
-  if (result.length === 0) {
-    res.status(404).send("Resource not found.");
-  } else {
-    res.send(result);
-  }
-});
-
 const addUser = (user) => {
   users["users_list"].push(user);
   return user;
@@ -93,8 +100,15 @@ const addUser = (user) => {
 
 app.post("/users", (req, res) => {
   const userToAdd = req.body;
-  addUser(userToAdd);
-  res.send();
+  let genID = (Math.floor(Math.random()*(999999 - 100000 + 1)) + 100000).toString();
+  const newUser = {
+    ...userToAdd,
+    id: genID,
+  };
+
+  users["users_list"].push(newUser);
+
+  res.status(201).send(newUser);
 });
 
 const delUser = (id) => {
@@ -113,7 +127,7 @@ app.delete("/users/:id", (req, res) => {
   const deleted = delUser(id);
 
   res
-    .status(deleted ? 200 : 404)
+    .status(deleted ? 204 : 404)
     .send(deleted ? { message: `User ${id} deleted.` } : { error: "User not found." });
 });
 
